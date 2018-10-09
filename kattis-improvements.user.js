@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kattis Improvements
 // @namespace    https://tyilo.com/
-// @version      0.4.0
+// @version      0.4.1
 // @description  ...
 // @author       Tyilo
 // @match        https://*.kattis.com/*
@@ -124,29 +124,27 @@ function autoUpdateJudgement() {
         return ['New', 'Running'].indexOf(getStatus()) === -1;
     }
 
-    function refreshResults() {
-        fetch(location.href, {credentials: 'include'})
-        .then(response => response.text())
-        .then(html => {
-            var template = document.createElement('template');
-            template.innerHTML = html;
-            var el1 = document.querySelector('#judge_table');
-            var el2 = template.content.querySelector('#judge_table');
-            if (!el1) {
-                if (!el2) {
-                    setTimeout(refreshResults, 500);
-                } else {
-                    location.reload();
-                }
+    async function refreshResults() {
+        var response = await fetch(location.href, {credentials: 'include'});
+        var html = await response.text();
+        var template = document.createElement('template');
+        template.innerHTML = html;
+        var el1 = document.querySelector('#judge_table');
+        var el2 = template.content.querySelector('#judge_table');
+        if (!el1) {
+            if (!el2) {
+                setTimeout(refreshResults, 500);
             } else {
-                el1.replaceWith(el2);
-                if (isDone()) {
-                    location.reload();
-                } else {
-                    setTimeout(refreshResults, 500);
-                }
+                location.reload();
             }
-        });
+        } else {
+            el1.replaceWith(el2);
+            if (isDone()) {
+                location.reload();
+            } else {
+                setTimeout(refreshResults, 500);
+            }
+        }
     }
 
     if (!isDone()) {
@@ -188,8 +186,7 @@ function resubmitLink() {
 
 function noDifficulty() {
     var diffCells = document.querySelectorAll('#problem_list_wrapper > table > * > * > *:nth-child(9)');
-    for (var i = 0; i < diffCells.length; i++) {
-        var cell = diffCells[i];
+    for (var cell of  diffCells) {
         cell.parentNode.removeChild(cell);
     }
 }
