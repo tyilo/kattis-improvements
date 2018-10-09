@@ -72,7 +72,6 @@ function init() {
 
     for (var feature of features) {
         var enabled = GM_getValue(feature.name, feature.default);
-        console.log(enabled);
         if (enabled) {
             if (document.location.pathname.match(new RegExp('^' + feature.pathRegex + '$'))) {
                 feature.function();
