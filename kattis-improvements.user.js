@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kattis Improvements
 // @namespace    https://tyilo.com/
-// @version      0.4.1
+// @version      0.4.2
 // @description  ...
 // @author       Tyilo
 // @match        https://*.kattis.com/*
@@ -103,8 +103,16 @@ init();
 function addInfluence() {
     var f = 5;
 
-    var tables = document.querySelectorAll('.main-content table');
-    var table = tables[tables.length - 1];
+    var tables = document.querySelectorAll('.main-content table.table-kattis');
+
+    var university_page = location.pathname.match(/^\/universities\//);
+    var table;
+    if (university_page) {
+        table = tables[0];
+    } else {
+        table = tables[1];
+    }
+
     table.querySelector('thead tr').innerHTML += '<th>Influence</th>';
     var rows = table.querySelectorAll('tbody tr');
     for(var i = 0; i < rows.length; i++) {
