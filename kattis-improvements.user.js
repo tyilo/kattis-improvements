@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kattis Improvements
 // @namespace    https://tyilo.com/
-// @version      0.4.2
+// @version      0.4.3
 // @description  ...
 // @author       Tyilo
 // @match        https://*.kattis.com/*
@@ -118,8 +118,9 @@ function addInfluence() {
     for(var i = 0; i < rows.length; i++) {
         var row = rows[i];
         var score = parseFloat(row.querySelector('td:last-of-type').textContent);
-        var influence = 1/f * Math.pow(1 - 1/f, i) * score;
-        row.innerHTML += '<td>' + influence.toFixed(1) + '</td>';
+        var fraction = 1/f * Math.pow(1 - 1/f, i);
+        var influence = fraction * score;
+        row.innerHTML += '<td>' + influence.toFixed(1) + ' (' + (fraction * 100).toPrecision(2) + ' %)</td>';
     }
 }
 
