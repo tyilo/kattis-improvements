@@ -18,6 +18,12 @@ var features = [
         pathRegex: '(/contests/[^/]+)?/problems/[^/]+',
     },
     {
+        name: 'My submissions link',
+        default: true,
+        function: addSubmissionsLink,
+        pathRegex: '(/contests/[^/]+)?/problems/[^/]+',
+    },
+    {
         name: 'Show influence',
         default: true,
         function: addInfluence,
@@ -99,6 +105,21 @@ function widenInstructions() {
     // Makes the width of the problem instructions match the old Kattis layout
     var instructions = document.getElementById("instructions");
     instructions.setAttribute("style", "flex: 0 1 900px; max-width: none");
+}
+
+function addSubmissionsLink() {
+    // This href has the form "/users/<username>"
+    var userHref = document.querySelector("#top_user_tooltip > .tooltip-content > a.image_info").href;
+    // The problem ID is the last component of the path
+    var problemId = location.pathname.split(/\//).pop();
+
+    var problemInfoList = document.querySelector("#instructions > .attribute_list");
+    problemInfoList.innerHTML = `
+    <div class="attribute_list-item">
+        <span class="attribute_list-label">My Submissions</span>
+        <span><a href="${userHref}/submissions/${problemId}">Show</a></span>
+    </div>
+    ` + problemInfoList.innerHTML;
 }
 
 function addInfluence() {
