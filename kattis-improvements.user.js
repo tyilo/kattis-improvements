@@ -98,7 +98,7 @@ init();
 function addInfluence() {
     var f = 5;
 
-    var tables = document.querySelectorAll('.main-content table.table-kattis');
+    var tables = document.querySelectorAll('main table.table2');
 
     var university_page = location.pathname.match(/^\/universities\//);
     var table;
@@ -108,14 +108,14 @@ function addInfluence() {
         table = tables[1];
     }
 
-    table.querySelector('thead tr').innerHTML += '<th>Influence</th>';
+    table.querySelector('thead tr').innerHTML += '<th class="table-item-autofit">Influence</th>';
     var rows = table.querySelectorAll('tbody tr');
     for(var i = 0; i < rows.length; i++) {
         var row = rows[i];
         var score = parseFloat(row.querySelector('td:last-of-type').textContent);
         var fraction = 1/f * Math.pow(1 - 1/f, i);
         var influence = fraction * score;
-        row.innerHTML += '<td>' + influence.toFixed(1) + ' (' + (fraction * 100).toPrecision(2) + ' %)</td>';
+        row.innerHTML += '<td class="table-item table-item-autofit table-align-right">' + influence.toFixed(1) + ' (' + (fraction * 100).toPrecision(2) + ' %)</td>';
     }
 }
 
