@@ -12,6 +12,12 @@
 
 var features = [
     {
+        name: 'Wider instructions',
+        default: true,
+        function: widenInstructions,
+        pathRegex: '(/contests/[^/]+)?/problems/[^/]+',
+    },
+    {
         name: 'Show influence',
         default: true,
         function: addInfluence,
@@ -88,6 +94,12 @@ function init() {
 }
 
 init();
+
+function widenInstructions() {
+    // Makes the width of the problem instructions match the old Kattis layout
+    var instructions = document.getElementById("instructions");
+    instructions.setAttribute("style", "flex: 0 1 900px; max-width: none");
+}
 
 function addInfluence() {
     var f = 5;
