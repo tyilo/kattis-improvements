@@ -18,12 +18,6 @@ var features = [
         pathRegex: '/(universities|countries)/[^/]+',
     },
     {
-        name: 'Auto update judgement',
-        default: true,
-        function: autoUpdateJudgement,
-        pathRegex: '/submissions/[^/]+',
-    },
-    {
         name: 'Hide difficulty',
         default: false,
         function: noDifficulty,
@@ -116,43 +110,6 @@ function addInfluence() {
         var fraction = 1/f * Math.pow(1 - 1/f, i);
         var influence = fraction * score;
         row.innerHTML += '<td class="table-item table-item-autofit table-align-right">' + influence.toFixed(1) + ' (' + (fraction * 100).toPrecision(2) + ' %)</td>';
-    }
-}
-
-function autoUpdateJudgement() {
-    function getStatus() {
-        return document.querySelector('.status').textContent;
-    }
-
-    function isDone() {
-        return ['New', 'Running'].indexOf(getStatus()) === -1;
-    }
-
-    async function refreshResults() {
-        var response = await fetch(location.href, {credentials: 'include'});
-        var html = await response.text();
-        var template = document.createElement('template');
-        template.innerHTML = html;
-        var el1 = document.querySelector('#judge_table');
-        var el2 = template.content.querySelector('#judge_table');
-        if (!el1) {
-            if (!el2) {
-                setTimeout(refreshResults, 500);
-            } else {
-                location.reload();
-            }
-        } else {
-            el1.replaceWith(el2);
-            if (isDone()) {
-                location.reload();
-            } else {
-                setTimeout(refreshResults, 500);
-            }
-        }
-    }
-
-    if (!isDone()) {
-        refreshResults();
     }
 }
 
