@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kattis Improvements
 // @namespace    https://tyilo.com/
-// @version      0.4.3
+// @version      0.5.0
 // @description  ...
 // @author       Tyilo
 // @match        https://*.kattis.com/*
