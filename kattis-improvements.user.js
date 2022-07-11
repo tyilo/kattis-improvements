@@ -7,6 +7,7 @@
 // @match        https://*.kattis.com/*
 // @grant        GM_getValue
 // @grant        GM_setValue
+// @noframes
 // ==/UserScript==
 
 var features = [
@@ -65,10 +66,9 @@ function init() {
         updateSetting(checkbox);
     }
 
-    var dropdown = document.querySelector('.dropdown-menu');
-    var divider = dropdown.querySelector('.divider');
-
-    dropdown.insertBefore(divider.cloneNode(), divider);
+    var dropdown = document.querySelector('#top_user_tooltip ul.main_menu');
+    var divider = document.createElement('hr');
+    dropdown.prepend(divider);
 
     for (var feature of features) {
         var enabled = GM_getValue(feature.name, feature.default);
@@ -79,8 +79,9 @@ function init() {
         }
 
         var li = document.createElement('li');
-        li.setAttribute('style', 'user-select: none;')
+        li.setAttribute('style', 'user-select: none;');
         var a = document.createElement('a');
+        a.setAttribute('class', 'main_menu-item main_menu-item_link profile_menu-item');
 
         var checkbox = document.createElement('input');
         checkbox.setAttribute('type', 'checkbox');
