@@ -137,7 +137,7 @@ function autoLanguage() {
 */
 
 function noDifficulty() {
-    var diffCells = document.querySelectorAll('#problem_list_wrapper > table > * > * > *:nth-child(9)');
+    var diffCells = document.querySelectorAll('.table-wrapper > table.table2 > * > * > *:nth-child(7)');
     for (var cell of  diffCells) {
         cell.parentNode.removeChild(cell);
     }
