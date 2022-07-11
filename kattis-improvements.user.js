@@ -24,12 +24,6 @@ var features = [
         pathRegex: '/submissions/[^/]+',
     },
     {
-        name: 'Resubmit link',
-        default: true,
-        function: resubmitLink,
-        pathRegex: '/submissions/[^/]+',
-    },
-    {
         name: 'Hide difficulty',
         default: false,
         function: noDifficulty,
@@ -184,15 +178,6 @@ function autoLanguage() {
     });
 }
 */
-
-function resubmitLink() {
-    var problem_link = document.querySelector('a[href^="/problems/"]');
-    var resubmit_link = document.createElement('a');
-    resubmit_link.href = problem_link.href + '/submit';
-    resubmit_link.textContent = '(resubmit)';
-    document.querySelector('h1').appendChild(document.createTextNode(' '));
-    document.querySelector('h1').appendChild(resubmit_link);
-}
 
 function noDifficulty() {
     var diffCells = document.querySelectorAll('#problem_list_wrapper > table > * > * > *:nth-child(9)');
