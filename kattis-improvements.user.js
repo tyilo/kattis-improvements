@@ -67,8 +67,13 @@ function init() {
     }
 
     var dropdown = document.querySelector('#top_user_tooltip ul.main_menu');
-    var divider = document.createElement('hr');
-    dropdown.prepend(divider);
+    // If the user is not logged in the dropdown element is replaced with a
+    // login button. We guard against that here and accept that the enabled
+    // features will work but the feature togglers will not be shown.
+    if(dropdown !== null) {
+        var divider = document.createElement('hr');
+        dropdown.prepend(divider);
+    }
 
     for (var feature of features) {
         var enabled = GM_getValue(feature.name, feature.default);
@@ -78,24 +83,26 @@ function init() {
             }
         }
 
-        var li = document.createElement('li');
-        li.setAttribute('style', 'user-select: none;');
-        var a = document.createElement('a');
-        a.setAttribute('class', 'main_menu-item main_menu-item_link profile_menu-item');
+        if(dropdown !== null) {
+            var li = document.createElement('li');
+            li.setAttribute('style', 'user-select: none;');
+            var a = document.createElement('a');
+            a.setAttribute('class', 'main_menu-item main_menu-item_link profile_menu-item');
 
-        var checkbox = document.createElement('input');
-        checkbox.setAttribute('type', 'checkbox');
-        checkbox.setAttribute('data-name', feature.name);
-        checkbox.checked = enabled;
-        checkbox.addEventListener('change', featureToggled);
+            var checkbox = document.createElement('input');
+            checkbox.setAttribute('type', 'checkbox');
+            checkbox.setAttribute('data-name', feature.name);
+            checkbox.checked = enabled;
+            checkbox.addEventListener('change', featureToggled);
 
-        a.appendChild(checkbox);
-        a.appendChild(document.createTextNode(' ' + feature.name));
-        a.addEventListener('click', lineClicked);
+            a.appendChild(checkbox);
+            a.appendChild(document.createTextNode(' ' + feature.name));
+            a.addEventListener('click', lineClicked);
 
-        li.appendChild(a);
+            li.appendChild(a);
 
-        dropdown.insertBefore(li, divider);
+            dropdown.insertBefore(li, divider);
+        }
     }
 }
 
@@ -108,18 +115,22 @@ function widenInstructions() {
 }
 
 function addSubmissionsLink() {
-    // This href has the form "/users/<username>"
-    var userHref = document.querySelector("#top_user_tooltip > .tooltip-content > a.image_info").href;
-    // The problem ID is the last component of the path
-    var problemId = location.pathname.split(/\//).pop();
+    var userImageInfo = document.querySelector("#top_user_tooltip > .tooltip-content > a.image_info");
+    // This element is not present if the user is not logged in.
+    if(userImageInfo !== null) {
+        // This href has the form "/users/<username>"
+        var userHref = userImageInfo.href;
+        // The problem ID is the last component of the path
+        var problemId = location.pathname.split(/\//).pop();
 
-    var problemInfoList = document.querySelector("#instructions > .attribute_list");
-    problemInfoList.innerHTML = `
-    <div class="attribute_list-item">
-        <span class="attribute_list-label">My Submissions</span>
-        <span><a href="${userHref}/submissions/${problemId}">Show</a></span>
-    </div>
-    ` + problemInfoList.innerHTML;
+        var problemInfoList = document.querySelector("#instructions > .attribute_list");
+        problemInfoList.innerHTML = `
+            <div class="attribute_list-item">
+                <span class="attribute_list-label">My Submissions</span>
+                <span><a href="${userHref}/submissions/${problemId}">Show</a></span>
+            </div>
+            ` + problemInfoList.innerHTML;
+    }
 }
 
 function addInfluence() {
