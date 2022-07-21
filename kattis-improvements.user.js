@@ -1,32 +1,33 @@
 // ==UserScript==
 // @name         Kattis Improvements
 // @namespace    https://tyilo.com/
-// @version      0.4.3
+// @version      0.5.0
 // @description  ...
 // @author       Tyilo
 // @match        https://*.kattis.com/*
 // @grant        GM_getValue
 // @grant        GM_setValue
+// @noframes
 // ==/UserScript==
 
 var features = [
+    {
+        name: 'Wider instructions',
+        default: true,
+        function: widenInstructions,
+        pathRegex: '(/contests/[^/]+)?/problems/[^/]+',
+    },
+    {
+        name: 'My submissions link',
+        default: true,
+        function: addSubmissionsLink,
+        pathRegex: '(/contests/[^/]+)?/problems/[^/]+',
+    },
     {
         name: 'Show influence',
         default: true,
         function: addInfluence,
         pathRegex: '/(universities|countries)/[^/]+',
-    },
-    {
-        name: 'Auto update judgement',
-        default: true,
-        function: autoUpdateJudgement,
-        pathRegex: '/submissions/[^/]+',
-    },
-    {
-        name: 'Resubmit link',
-        default: true,
-        function: resubmitLink,
-        pathRegex: '/submissions/[^/]+',
     },
     {
         name: 'Hide difficulty',
@@ -65,10 +66,14 @@ function init() {
         updateSetting(checkbox);
     }
 
-    var dropdown = document.querySelector('.dropdown-menu');
-    var divider = dropdown.querySelector('.divider');
-
-    dropdown.insertBefore(divider.cloneNode(), divider);
+    var dropdown = document.querySelector('#top_user_tooltip ul.main_menu');
+    // If the user is not logged in the dropdown element is replaced with a
+    // login button. We guard against that here and accept that the enabled
+    // features will work but the feature togglers will not be shown.
+    if(dropdown !== null) {
+        var divider = document.createElement('hr');
+        dropdown.prepend(divider);
+    }
 
     for (var feature of features) {
         var enabled = GM_getValue(feature.name, feature.default);
@@ -78,32 +83,60 @@ function init() {
             }
         }
 
-        var li = document.createElement('li');
-        li.setAttribute('style', 'user-select: none;')
-        var a = document.createElement('a');
+        if(dropdown !== null) {
+            var li = document.createElement('li');
+            li.setAttribute('style', 'user-select: none;');
+            var a = document.createElement('a');
+            a.setAttribute('class', 'main_menu-item main_menu-item_link profile_menu-item');
 
-        var checkbox = document.createElement('input');
-        checkbox.setAttribute('type', 'checkbox');
-        checkbox.setAttribute('data-name', feature.name);
-        checkbox.checked = enabled;
-        checkbox.addEventListener('change', featureToggled);
+            var checkbox = document.createElement('input');
+            checkbox.setAttribute('type', 'checkbox');
+            checkbox.setAttribute('data-name', feature.name);
+            checkbox.checked = enabled;
+            checkbox.addEventListener('change', featureToggled);
 
-        a.appendChild(checkbox);
-        a.appendChild(document.createTextNode(' ' + feature.name));
-        a.addEventListener('click', lineClicked);
+            a.appendChild(checkbox);
+            a.appendChild(document.createTextNode(' ' + feature.name));
+            a.addEventListener('click', lineClicked);
 
-        li.appendChild(a);
+            li.appendChild(a);
 
-        dropdown.insertBefore(li, divider);
+            dropdown.insertBefore(li, divider);
+        }
     }
 }
 
 init();
 
+function widenInstructions() {
+    // Makes the width of the problem instructions match the old Kattis layout
+    var instructions = document.getElementById("instructions");
+    instructions.setAttribute("style", "flex: 0 1 900px; max-width: none");
+}
+
+function addSubmissionsLink() {
+    var userImageInfo = document.querySelector("#top_user_tooltip > .tooltip-content > a.image_info");
+    // This element is not present if the user is not logged in.
+    if(userImageInfo !== null) {
+        // This href has the form "/users/<username>"
+        var userHref = userImageInfo.href;
+        // The problem ID is the last component of the path
+        var problemId = location.pathname.split(/\//).pop();
+
+        var problemInfoList = document.querySelector("#instructions > .attribute_list");
+        problemInfoList.innerHTML = `
+            <div class="attribute_list-item">
+                <span class="attribute_list-label">My Submissions</span>
+                <span><a href="${userHref}/submissions/${problemId}">Show</a></span>
+            </div>
+            ` + problemInfoList.innerHTML;
+    }
+}
+
 function addInfluence() {
     var f = 5;
 
-    var tables = document.querySelectorAll('.main-content table.table-kattis');
+    var tables = document.querySelectorAll('main table.table2');
 
     var university_page = location.pathname.match(/^\/universities\//);
     var table;
@@ -113,51 +146,14 @@ function addInfluence() {
         table = tables[1];
     }
 
-    table.querySelector('thead tr').innerHTML += '<th>Influence</th>';
+    table.querySelector('thead tr').innerHTML += '<th class="table-item-autofit">Influence</th>';
     var rows = table.querySelectorAll('tbody tr');
     for(var i = 0; i < rows.length; i++) {
         var row = rows[i];
         var score = parseFloat(row.querySelector('td:last-of-type').textContent);
         var fraction = 1/f * Math.pow(1 - 1/f, i);
         var influence = fraction * score;
-        row.innerHTML += '<td>' + influence.toFixed(1) + ' (' + (fraction * 100).toPrecision(2) + ' %)</td>';
-    }
-}
-
-function autoUpdateJudgement() {
-    function getStatus() {
-        return document.querySelector('.status').textContent;
-    }
-
-    function isDone() {
-        return ['New', 'Running'].indexOf(getStatus()) === -1;
-    }
-
-    async function refreshResults() {
-        var response = await fetch(location.href, {credentials: 'include'});
-        var html = await response.text();
-        var template = document.createElement('template');
-        template.innerHTML = html;
-        var el1 = document.querySelector('#judge_table');
-        var el2 = template.content.querySelector('#judge_table');
-        if (!el1) {
-            if (!el2) {
-                setTimeout(refreshResults, 500);
-            } else {
-                location.reload();
-            }
-        } else {
-            el1.replaceWith(el2);
-            if (isDone()) {
-                location.reload();
-            } else {
-                setTimeout(refreshResults, 500);
-            }
-        }
-    }
-
-    if (!isDone()) {
-        refreshResults();
+        row.innerHTML += '<td class="table-item table-item-autofit table-align-right">' + influence.toFixed(1) + ' (' + (fraction * 100).toPrecision(2) + ' %)</td>';
     }
 }
 
@@ -184,17 +180,8 @@ function autoLanguage() {
 }
 */
 
-function resubmitLink() {
-    var problem_link = document.querySelector('a[href^="/problems/"]');
-    var resubmit_link = document.createElement('a');
-    resubmit_link.href = problem_link.href + '/submit';
-    resubmit_link.textContent = '(resubmit)';
-    document.querySelector('h1').appendChild(document.createTextNode(' '));
-    document.querySelector('h1').appendChild(resubmit_link);
-}
-
 function noDifficulty() {
-    var diffCells = document.querySelectorAll('#problem_list_wrapper > table > * > * > *:nth-child(9)');
+    var diffCells = document.querySelectorAll('.table-wrapper > table.table2 > * > * > *:nth-child(7)');
     for (var cell of  diffCells) {
         cell.parentNode.removeChild(cell);
     }
