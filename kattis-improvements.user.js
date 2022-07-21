@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kattis Improvements
 // @namespace    https://tyilo.com/
-// @version      0.5.0
+// @version      0.5.1
 // @description  ...
 // @author       Tyilo
 // @match        https://*.kattis.com/*
@@ -10,18 +10,21 @@
 // @noframes
 // ==/UserScript==
 
+// The problem page can have a contest prefix and a language suffix.
+var problemPathRegex = '(?:/contests/[^/]+)?/problems/([^/]+)(?:/[^/]+)?';
+
 var features = [
     {
         name: 'Wider instructions',
         default: true,
         function: widenInstructions,
-        pathRegex: '(/contests/[^/]+)?/problems/[^/]+',
+        pathRegex: problemPathRegex,
     },
     {
         name: 'My submissions link',
         default: true,
         function: addSubmissionsLink,
-        pathRegex: '(/contests/[^/]+)?/problems/[^/]+',
+        pathRegex: problemPathRegex,
     },
     {
         name: 'Show influence',
@@ -120,8 +123,7 @@ function addSubmissionsLink() {
     if(userImageInfo !== null) {
         // This href has the form "/users/<username>"
         var userHref = userImageInfo.href;
-        // The problem ID is the last component of the path
-        var problemId = location.pathname.split(/\//).pop();
+        var problemId = location.pathname.match(new RegExp(problemPathRegex))[1];
 
         var problemInfoList = document.querySelector("#instructions > .attribute_list");
         problemInfoList.innerHTML = `
