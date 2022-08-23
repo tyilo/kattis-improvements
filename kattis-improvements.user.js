@@ -21,12 +21,6 @@ var features = [
         pathRegex: problemPathRegex,
     },
     {
-        name: 'My submissions link',
-        default: true,
-        function: addSubmissionsLink,
-        pathRegex: problemPathRegex,
-    },
-    {
         name: 'Show influence',
         default: true,
         function: addInfluence,
@@ -115,24 +109,6 @@ function widenInstructions() {
     // Makes the width of the problem instructions match the old Kattis layout
     var instructions = document.getElementById("instructions");
     instructions.setAttribute("style", "flex: 0 1 900px; max-width: none");
-}
-
-function addSubmissionsLink() {
-    var userImageInfo = document.querySelector("#top_user_tooltip > .tooltip-content > a.image_info");
-    // This element is not present if the user is not logged in.
-    if(userImageInfo !== null) {
-        // This href has the form "/users/<username>"
-        var userHref = userImageInfo.href;
-        var problemId = location.pathname.match(new RegExp(problemPathRegex))[1];
-
-        var problemInfoList = document.querySelector("#instructions > .attribute_list");
-        problemInfoList.innerHTML = `
-            <div class="attribute_list-item">
-                <span class="attribute_list-label">My Submissions</span>
-                <span><a href="${userHref}/submissions/${problemId}">Show</a></span>
-            </div>
-            ` + problemInfoList.innerHTML;
-    }
 }
 
 function addInfluence() {
