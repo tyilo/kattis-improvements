@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kattis Improvements
 // @namespace    https://tyilo.com/
-// @version      0.5.1
+// @version      0.5.2
 // @description  ...
 // @author       Tyilo
 // @match        https://*.kattis.com/*
@@ -18,12 +18,6 @@ var features = [
         name: 'Wider instructions',
         default: true,
         function: widenInstructions,
-        pathRegex: problemPathRegex,
-    },
-    {
-        name: 'My submissions link',
-        default: true,
-        function: addSubmissionsLink,
         pathRegex: problemPathRegex,
     },
     {
@@ -113,26 +107,10 @@ init();
 
 function widenInstructions() {
     // Makes the width of the problem instructions match the old Kattis layout
-    var instructions = document.getElementById("instructions");
-    instructions.setAttribute("style", "flex: 0 1 900px; max-width: none");
-}
-
-function addSubmissionsLink() {
-    var userImageInfo = document.querySelector("#top_user_tooltip > .tooltip-content > a.image_info");
-    // This element is not present if the user is not logged in.
-    if(userImageInfo !== null) {
-        // This href has the form "/users/<username>"
-        var userHref = userImageInfo.href;
-        var problemId = location.pathname.match(new RegExp(problemPathRegex))[1];
-
-        var problemInfoList = document.querySelector("#instructions > .attribute_list");
-        problemInfoList.innerHTML = `
-            <div class="attribute_list-item">
-                <span class="attribute_list-label">My Submissions</span>
-                <span><a href="${userHref}/submissions/${problemId}">Show</a></span>
-            </div>
-            ` + problemInfoList.innerHTML;
-    }
+    document.getElementById("instructions-container")
+        .setAttribute("style", "flex: 0 1 900px; max-width: none");
+    document.querySelector("#instructions-container > article > div")
+        .setAttribute("style", "max-width: none; margin: 0 auto");
 }
 
 function addInfluence() {
@@ -183,7 +161,7 @@ function autoLanguage() {
 */
 
 function noDifficulty() {
-    var diffCells = document.querySelectorAll('.table-wrapper > table.table2 > * > * > *:nth-child(7)');
+    var diffCells = document.querySelectorAll('.table-wrapper > table.table2 > * > * > *:nth-child(8)');
     for (var cell of  diffCells) {
         cell.parentNode.removeChild(cell);
     }
