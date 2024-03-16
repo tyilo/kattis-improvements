@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kattis Improvements
 // @namespace    https://tyilo.com/
-// @version      0.5.3
+// @version      0.5.4
 // @description  ...
 // @author       Tyilo
 // @match        https://*.kattis.com/*
@@ -195,6 +195,8 @@ function penaltyLowerBound() {
     const timeRemaining = parseInt(parts[1]) * 60 + parseInt(parts[2]);
     const currentPenalty = 5 * 60 - timeRemaining;
 
+    const minPenalties = [];
+
     for (const row of [...table.querySelectorAll('tr')]) {
       if (!row.querySelector('.standings-cell--expand')) {
         continue;
@@ -213,6 +215,25 @@ function penaltyLowerBound() {
       const minPenalty = parseInt(penaltyElement.textContent) + minExtraPenalty;
 
       penaltyElement.textContent += ` (${minPenalty})`;
+
+      minPenalties.push(minPenalty);
+    }
+
+    let i = 0;
+    for (const row of [...table.querySelectorAll('tr')]) {
+      if (!row.querySelector('.standings-cell--expand')) {
+        continue;
+      }
+
+      const minPenalty = minPenalties[i];
+      const couldBeBetter = minPenalties.slice(i + 1).filter(v => minPenalty >= v).length;
+
+      const rankElement = row.querySelector('td strong');
+      const rank = parseInt(rankElement.textContent);
+
+      rankElement.textContent += ` (${rank + couldBeBetter})`;
+
+      i++;
     }
 
     table.classList.add("min-penalty-computed");
