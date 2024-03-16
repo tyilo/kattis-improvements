@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kattis Improvements
 // @namespace    https://tyilo.com/
-// @version      0.5.2
+// @version      0.5.3
 // @description  ...
 // @author       Tyilo
 // @match        https://*.kattis.com/*
@@ -38,6 +38,12 @@ var features = [
         function: autoRefresh,
         pathRegex: '.*',
     },
+    {
+      name: 'Penalty lower bound',
+      default: true,
+      function: penaltyLowerBound,
+      pathRegex: '.*\/standings(\/?)[^/]*',
+    }
 ];
 
 function init() {
@@ -171,4 +177,47 @@ function autoRefresh() {
     setTimeout(() => {
         window.location.reload();
     }, 10 * 1000);
+}
+
+function penaltyLowerBound() {
+  function inject() {
+    const table = document.querySelector('.standings-table');
+    if (!table || table.classList.contains("min-penalty-computed")) {
+      return;
+    }
+
+    const remainingTimeStr = document.querySelector('.count_remaining').textContent;
+
+    const parts = remainingTimeStr.match(/(\d+)h (\d+)m (\d+)s/);
+    if (!parts) {
+      return;
+    }
+    const timeRemaining = parseInt(parts[1]) * 60 + parseInt(parts[2]);
+    const currentPenalty = 5 * 60 - timeRemaining;
+
+    for (const row of [...table.querySelectorAll('tr')]) {
+      if (!row.querySelector('.standings-cell--expand')) {
+        continue;
+      }
+      const problems = row.querySelectorAll('td').length - 4;
+      const solved = row.querySelectorAll('td.solved').length;
+
+      let triesNotCompleted = 0;
+      for (const notCompleted of row.querySelectorAll('.pending, .attempted')) {
+        triesNotCompleted += notCompleted.textContent.trim().split(/\s+/)[0].split('+').map(v => parseInt(v)).reduce((a, b) => a + b);
+      }
+
+      const minExtraPenalty = (problems - solved) * currentPenalty + triesNotCompleted * 20;
+      const penaltyElement = row.querySelector('.standings-cell-time');
+
+      const minPenalty = parseInt(penaltyElement.textContent) + minExtraPenalty;
+
+      penaltyElement.textContent += ` (${minPenalty})`;
+    }
+
+    table.classList.add("min-penalty-computed");
+  }
+
+  inject();
+  setInterval(inject, 1000);
 }
