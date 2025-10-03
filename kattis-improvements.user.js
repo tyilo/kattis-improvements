@@ -69,13 +69,14 @@ function init() {
         updateSetting(checkbox);
     }
 
-    var dropdown = document.querySelector('#top_user_tooltip ul.main_menu');
+    var dropdown = document.querySelector('#top_user_menu .collapsible-menu-content');
+    var dropDownList;
     // If the user is not logged in the dropdown element is replaced with a
     // login button. We guard against that here and accept that the enabled
     // features will work but the feature togglers will not be shown.
     if(dropdown !== null) {
-        var divider = document.createElement('hr');
-        dropdown.prepend(divider);
+        dropdown.prepend(document.createElement('hr'));
+        dropdown.prepend(dropDownList = document.createElement('ul'));
     }
 
     for (var feature of features) {
@@ -86,7 +87,7 @@ function init() {
             }
         }
 
-        if(dropdown !== null) {
+        if(dropDownList) {
             var li = document.createElement('li');
             li.setAttribute('style', 'user-select: none;');
             var a = document.createElement('a');
@@ -104,7 +105,7 @@ function init() {
 
             li.appendChild(a);
 
-            dropdown.insertBefore(li, divider);
+            dropDownList.appendChild(li);
         }
     }
 }
