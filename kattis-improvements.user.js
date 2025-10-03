@@ -181,65 +181,64 @@ function autoRefresh() {
 }
 
 function penaltyLowerBound() {
-  function inject() {
-    const table = document.querySelector('.standings-table');
-    if (!table || table.classList.contains("min-penalty-computed")) {
-      return;
+    function inject() {
+        const table = document.querySelector('.standings-table');
+        if (!table || table.classList.contains('min-penalty-computed'))
+            return;
+
+        const remainingTimeStr = document.querySelector('.count_remaining').textContent;
+
+        const parts = remainingTimeStr.match(/(\d+)h (\d+)m (\d+)s/);
+        if (!parts)
+            return;
+
+        table.classList.add('min-penalty-computed');
+
+        const timeRemaining = parseInt(parts[1]) * 60 + parseInt(parts[2]);
+        const currentPenalty = 5 * 60 - timeRemaining;
+
+        const minPenalties = [];
+
+        for (const row of [...table.querySelectorAll('tbody > tr')]) {
+            if (!row.querySelector('.standings-cell--expand'))
+                continue;
+
+            const problems = row.querySelectorAll('.standings-cell-problem').length || (row.querySelectorAll('td').length - 4);
+            const solved = row.querySelectorAll('.solved, .first').length;
+
+            let triesNotCompleted = 0;
+            for (const notCompleted of row.querySelectorAll('.pending, .attempted')) {
+                triesNotCompleted += notCompleted.textContent.trim().split(/\s+/)[0].split('+').map(v => parseInt(v)).reduce((a, b) => a + b);
+            }
+
+            const minExtraPenalty = (problems - solved) * currentPenalty + triesNotCompleted * 20;
+            const penaltyElement = row.querySelector('.standings-cell-time');
+
+            const minPenalty = parseInt(penaltyElement.textContent) + minExtraPenalty;
+
+            penaltyElement.textContent += ` (${minPenalty})`;
+
+            minPenalties.push(minPenalty);
+        }
+
+        let i = 0;
+        for (const row of [...table.querySelectorAll('tbody > tr')]) {
+            if (!row.querySelector('.standings-cell--expand'))
+                continue;
+
+
+            const minPenalty = minPenalties[i];
+            const couldBeBetter = minPenalties.slice(i + 1).filter(v => minPenalty >= v).length;
+
+            const rankElement = row.querySelector('td.font-bold');
+            const rank = parseInt(rankElement.textContent);
+
+            rankElement.textContent += ` (${rank + couldBeBetter})`;
+
+            i++;
+        }
     }
 
-    const remainingTimeStr = document.querySelector('.count_remaining').textContent;
-
-    const parts = remainingTimeStr.match(/(\d+)h (\d+)m (\d+)s/);
-    if (!parts) {
-      return;
-    }
-    const timeRemaining = parseInt(parts[1]) * 60 + parseInt(parts[2]);
-    const currentPenalty = 5 * 60 - timeRemaining;
-
-    const minPenalties = [];
-
-    for (const row of [...table.querySelectorAll('tr')]) {
-      if (!row.querySelector('.standings-cell--expand')) {
-        continue;
-      }
-      const problems = row.querySelectorAll('td').length - 4;
-      const solved = row.querySelectorAll('td.solved').length;
-
-      let triesNotCompleted = 0;
-      for (const notCompleted of row.querySelectorAll('.pending, .attempted')) {
-        triesNotCompleted += notCompleted.textContent.trim().split(/\s+/)[0].split('+').map(v => parseInt(v)).reduce((a, b) => a + b);
-      }
-
-      const minExtraPenalty = (problems - solved) * currentPenalty + triesNotCompleted * 20;
-      const penaltyElement = row.querySelector('.standings-cell-time');
-
-      const minPenalty = parseInt(penaltyElement.textContent) + minExtraPenalty;
-
-      penaltyElement.textContent += ` (${minPenalty})`;
-
-      minPenalties.push(minPenalty);
-    }
-
-    let i = 0;
-    for (const row of [...table.querySelectorAll('tr')]) {
-      if (!row.querySelector('.standings-cell--expand')) {
-        continue;
-      }
-
-      const minPenalty = minPenalties[i];
-      const couldBeBetter = minPenalties.slice(i + 1).filter(v => minPenalty >= v).length;
-
-      const rankElement = row.querySelector('td strong');
-      const rank = parseInt(rankElement.textContent);
-
-      rankElement.textContent += ` (${rank + couldBeBetter})`;
-
-      i++;
-    }
-
-    table.classList.add("min-penalty-computed");
-  }
-
-  inject();
-  setInterval(inject, 1000);
+    inject();
+    setInterval(inject, 1000);
 }
