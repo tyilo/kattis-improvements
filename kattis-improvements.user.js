@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kattis Improvements
 // @namespace    https://tyilo.com/
-// @version      0.5.4
+// @version      0.5.5
 // @description  ...
 // @author       Tyilo
 // @match        https://*.kattis.com/*
@@ -81,11 +81,8 @@ function init() {
 
     for (var feature of features) {
         var enabled = GM_getValue(feature.name, feature.default);
-        if (enabled) {
-            if (document.location.pathname.match(new RegExp('^' + feature.pathRegex + '$'))) {
-                feature.function();
-            }
-        }
+        if (enabled && document.location.pathname.match(new RegExp('^' + feature.pathRegex + '$')))
+            feature.function();
 
         if(dropDownList) {
             var li = document.createElement('li');
